@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{#if title}{title}{#else}Thông báo Atlas ERP{/if}</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            max-width: 600px;
+            margin: 0 auto;
+            padding: 20px;
+            background: #f4f4f4;
+        }
+
+        .container {
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        }
+
+        h1 {
+            color: #2563eb;
+        }
+
+        .message {
+            background: #eff6ff;
+            padding: 15px;
+            border-left: 4px solid #3b82f6;
+            margin: 20px 0;
+        }
+
+        .footer {
+            font-size: 0.9em;
+            color: #666;
+            text-align: center;
+            margin-top: 30px;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <h1>{#if title}{title}{#else}Thông báo mới{/if}</h1>
+
+        <p>Kính gửi <strong>{#if userName}{userName}{#else}đồng nghiệp{/if}</strong>,</p>
+
+        <div class="message">
+            <p>{#if message}{message}{#else}Không có thông điệp.{/if}</p>
+        </div>
+
+        <p>Thời gian: <em>{#if date}{date}{/if}</em></p>
+
+        <div class="footer">
+            Trân trọng,<br>
+            Đội ngũ Atlas ERP
+        </div>
+    </div>
+</body>
+
+</html>

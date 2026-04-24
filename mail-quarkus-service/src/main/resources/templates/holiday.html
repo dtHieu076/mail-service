@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{#if holidayName}{holidayName}{#else}Chúc mừng ngày lễ{/if}</title>
+</head>
+
+<body
+    style="font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; line-height: 1.6; color: #333333; background-color: #fce7f3; margin: 0; padding: 20px;">
+
+    <table width="100%" cellpadding="0" cellspacing="0" border="0"
+        style="max-width: 600px; margin: 0 auto; background-color: #ffffff; border-radius: 12px; overflow: hidden; box-shadow: 0 4px 15px rgba(225, 29, 72, 0.1);">
+
+        <tr>
+            <td
+                style="background-color: #be123c; padding: 40px 20px; text-align: center; border-bottom: 4px solid #fbbf24;">
+                <h1 style="color: #ffffff; margin: 0; font-size: 28px; text-transform: uppercase; letter-spacing: 1px;">
+                    🎉 CHÚC MỪNG {#if holidayName}{holidayName}{#else}NGÀY LỄ{/if} 🎉
+                </h1>
+            </td>
+        </tr>
+
+        <tr>
+            <td style="padding: 35px 30px;">
+                <p style="font-size: 17px; margin-top: 0; color: #4c0519;">Thân gửi <strong style="color: #be123c;">
+                        {#if userName}{userName}{#else}bạn{/if}
+                    </strong>,</p>
+
+                <p style="font-size: 16px; color: #4b5563; white-space: pre-line; line-height: 1.8;">
+                    {#if message}{message}{#else}Nhân dịp đặc biệt này, công ty xin gửi đến bạn những lời chúc tốt đẹp
+                    nhất. Chúc bạn có những ngày nghỉ thật vui vẻ, ấm áp và hạnh phúc bên gia đình và những người thân
+                    yêu!{/if}
+                </p>
+
+                <div style="margin-top: 30px; text-align: center;">
+                    <p style="font-size: 18px; font-weight: bold; color: #be123c; margin-bottom: 5px;">Happy Holidays!
+                    </p>
+                </div>
+            </td>
+        </tr>
+
+        <tr>
+            <td
+                style="background-color: #fff1f2; text-align: center; padding: 20px; font-size: 14px; color: #9f1239; border-top: 1px solid #fecdd3;">
+                <p style="margin: 0; font-weight: 600;">Ban Giám Đốc & Công đoàn Atlas ERP</p>
+                <p style="margin: 5px 0 0 0; font-size: 12px; color: #fda4af;">Hệ thống thông báo nội bộ Atlas ERP</p>
+            </td>
+        </tr>
+
+    </table>
+
+</body>
+
+</html>
