@@ -4,14 +4,19 @@ from kafka import KafkaProducer
 import json
 import time
 import math
+import os
 
 # --- 1. CẤU HÌNH & KHỞI TẠO ---
+
+
+KAFKA_SERVER = os.getenv("KAFKA_SERVER", "localhost:9092")
+WS_URL = os.getenv("WS_URL", "ws://localhost:8080/mail-status")
 
 def init_kafka_producer():
     if 'kafka_producer' not in st.session_state:
         try:
             st.session_state.kafka_producer = KafkaProducer(
-                bootstrap_servers=['localhost:9092'],
+                bootstrap_servers=[KAFKA_SERVER],
                 value_serializer=lambda v: json.dumps(v).encode('utf-8'),
                 acks='all'
             )
@@ -28,7 +33,7 @@ def connect_ws():
             return st.session_state.ws
         
         # Nếu chưa có hoặc đã chết, tạo mới
-        st.session_state.ws = create_connection("ws://localhost:8080/mail-status", timeout=10)
+        st.session_state.ws = create_connection(WS_URL, timeout=10)
         return st.session_state.ws
     except Exception as e:
         st.error(f"Không thể kết nối WebSocket tới Quarkus: {e}")
@@ -187,7 +192,7 @@ def receive_reports(status_container):
         except Exception as e:
             st.warning(f"Dừng nhận báo cáo: {e}")
             break
-        
+
 # --- 3. GIAO DIỆN CHÍNH ---
 
 def main():

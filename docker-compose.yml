@@ -1,37 +1,42 @@
 services:
-  # 1. DATABASE: PostgreSQL
+  # ========================
+  # DATABASE
+  # ========================
   my-postgres:
     image: postgres:16
     container_name: my-postgres
     ports:
       - "5432:5432"
     environment:
-      - POSTGRES_USER=postgres
-      - POSTGRES_PASSWORD=12345
-      - POSTGRES_DB=postgres
-      - TZ=Asia/Ho_Chi_Minh
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: 12345
+      POSTGRES_DB: postgres
+      TZ: Asia/Ho_Chi_Minh
     volumes:
       - postgres_data:/var/lib/postgresql/data
 
-  # 2. EMAIL TEST: MailHog
+  # ========================
+  # MAILHOG
+  # ========================
   mailhog:
     image: mailhog/mailhog:v1.0.1
     container_name: mailhog
     ports:
-      - "1025:1025" # SMTP server
-      - "8025:8025" # Web UI
-    logging:
-      driver: 'none'
+      - "1025:1025"
+      - "8025:8025"
 
-  # 3. MESSAGE BROKER: Zookeeper (Confluent)
+  # ========================
+  # ZOOKEEPER
+  # ========================
   zookeeper:
     image: confluentinc/cp-zookeeper:7.6.1
     container_name: zookeeper
     environment:
       ZOOKEEPER_CLIENT_PORT: 2181
-      ZOOKEEPER_TICK_TIME: 2000
 
-  # 4. MESSAGE BROKER: Kafka (Confluent)
+  # ========================
+  # KAFKA (FIX LISTENER)
+  # ========================
   kafka-local:
     image: confluentinc/cp-kafka:7.6.1
     container_name: kafka-local
@@ -40,12 +45,68 @@ services:
     environment:
       KAFKA_BROKER_ID: 1
       KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
-      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://localhost:9092
-      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: PLAINTEXT:PLAINTEXT
-      KAFKA_INTER_BROKER_LISTENER_NAME: PLAINTEXT
+
+      # 👇 FIX QUAN TRỌNG
+      KAFKA_LISTENERS: PLAINTEXT://0.0.0.0:9092
+      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka-local:9092
       KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+
     depends_on:
       - zookeeper
 
+  # ========================
+  # QUARKUS BACKEND
+  # ========================
+  mail-service:
+    image: dthieudocker/mail-quarkus-backend:2.0
+    container_name: mail-service
+    ports:
+      - "8080:8080"
+
+    environment:
+      # ========================
+      # DATABASE
+      # ========================
+      QUARKUS_DATASOURCE_JDBC_URL: jdbc:postgresql://my-postgres:5432/postgres
+      QUARKUS_DATASOURCE_USERNAME: postgres
+      QUARKUS_DATASOURCE_PASSWORD: 12345
+
+      # ========================
+      # KAFKA (override toàn bộ)
+      # ========================
+      KAFKA_BOOTSTRAP_SERVERS: kafka-local:9092
+
+      # ========================
+      # MAIL
+      # ========================
+      QUARKUS_MAILER_HOST: mailhog
+      QUARKUS_MAILER_PORT: 1025
+
+    depends_on:
+      - kafka-local
+      - my-postgres
+      - mailhog
+
+  # ========================
+  # STREAMLIT UI
+  # ========================
+  mail-ui:
+    image: dthieudocker/mail-ui:2.0
+    container_name: mail-ui
+    ports:
+      - "8501:8501"
+
+    environment:
+      # 👇 override config UI
+      KAFKA_SERVER: kafka-local:9092
+      WS_URL: ws://mail-service:8080/mail-status
+
+    depends_on:
+      - mail-service
+      - kafka-local
+
+# ========================
+# VOLUMES
+# ========================
 volumes:
   postgres_data:
