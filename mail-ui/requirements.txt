@@ -1,0 +1,12 @@
+# --- Frontend UI ---
+streamlit==1.32.0
+pandas==2.2.1
+
+# --- Message Broker (Kafka) ---
+kafka-python-ng==2.2.2
+
+# --- WebSocket Client ---
+websocket-client==1.7.0
+
+# --- Database (Dành cho bản build sẵn) ---
+psycopg2-binary==2.9.9

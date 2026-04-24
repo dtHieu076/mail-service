@@ -18,6 +18,9 @@ import io.quarkus.mailer.Mailer;
 import io.smallrye.reactive.messaging.annotations.Blocking;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.transaction.Transactional;
+import java.util.Map;
+import jakarta.inject.Inject;
+import org.atlas_erp.Websocket.MailStatusSocket;
 
 @ApplicationScoped
 public class MailWorker {
@@ -41,6 +44,9 @@ public class MailWorker {
         this.mailer = mailer;
         this.objectMapper = objectMapper;
     }
+
+    @Inject
+    MailStatusSocket mailStatusSocket;
 
     @Incoming("internal-jobs-in")
     @Blocking(ordered = false)
@@ -82,6 +88,8 @@ public class MailWorker {
 
             updateBatch(successIds, failIds, campaignId);
 
+            sendWebSocketReport(campaignId, successIds.size(), failIds.size());
+
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -122,5 +130,26 @@ public class MailWorker {
         campaignRepo.update(
                 "status = 'COMPLETED' WHERE id = ?1 AND pendingCount <= 0",
                 campaignId);
+    }
+
+    // =========================
+    // WEBSOCKET METHODS
+    // =========================
+    private void sendWebSocketReport(UUID campaignId, int success, int fail) {
+        try {
+            // Tạo một Map để chuyển thành JSON gửi qua UI
+            Map<String, Object> report = Map.of(
+                "campaignId", campaignId.toString(),
+                "success", success,
+                "fail", fail,
+                "totalInBatch", (success + fail),
+                "timestamp", System.currentTimeMillis()
+            );
+            
+            String jsonReport = objectMapper.writeValueAsString(report);
+            mailStatusSocket.broadcast(jsonReport);
+        } catch (Exception e) {
+            System.err.println("Lỗi gửi WebSocket: " + e.getMessage());
+        }
     }
 }

@@ -1,0 +1,8 @@
+# Tạo môi trường ảo bằng py
+# py -m venv venv
+
+# Kích hoạt môi trường (Lưu ý: Dùng dấu chấm và đường dẫn)
+# .\venv\Scripts\Activate.ps1
+
+# Cài đặt thư viện (Khi đã có chữ (venv) ở đầu dòng)
+# pip install -r requirements.txt
