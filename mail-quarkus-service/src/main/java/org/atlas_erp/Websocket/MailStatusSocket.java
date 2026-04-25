@@ -14,6 +14,8 @@ public class MailStatusSocket {
 
     @OnOpen
     public void onOpen(Session session) {
+        // 30 phút
+        session.setMaxIdleTimeout(1800000);
         sessions.put(session.getId(), session);
     }
 

@@ -3,7 +3,7 @@ services:
   # DATABASE
   # ========================
   my-postgres:
-    image: postgres:16
+    image: postgres:16-alpine
     container_name: my-postgres
     ports:
       - "5432:5432"
@@ -18,47 +18,53 @@ services:
   # ========================
   # MAILHOG
   # ========================
-  mailhog:
-    image: mailhog/mailhog:v1.0.1
-    container_name: mailhog
+  # mailhog:
+  #   image: mailhog/mailhog:v1.0.1
+  #   container_name: mailhog
+  #   ports:
+  #     - "1025:1025"
+  #     - "8025:8025"
+
+  # ========================
+  # MAILPIT (THAY THẾ MAILHOG)
+  # ========================
+  mailpit:
+    image: axllent/mailpit
+    container_name: mailpit
     ports:
-      - "1025:1025"
-      - "8025:8025"
-
+      - "1025:1025" # Cổng nhận mail SMTP
+      - "8025:8025" # Cổng Web UI
   # ========================
-  # ZOOKEEPER
-  # ========================
-  zookeeper:
-    image: confluentinc/cp-zookeeper:7.6.1
-    container_name: zookeeper
-    environment:
-      ZOOKEEPER_CLIENT_PORT: 2181
-
-  # ========================
-  # KAFKA (FIX LISTENER)
+  # REDPANDA (THAY KAFKA)
   # ========================
   kafka-local:
-    image: confluentinc/cp-kafka:7.6.1
+    image: redpandadata/redpanda:latest
     container_name: kafka-local
     ports:
       - "9092:9092"
-    environment:
-      KAFKA_BROKER_ID: 1
-      KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
-
-      # 👇 FIX QUAN TRỌNG
-      KAFKA_LISTENERS: PLAINTEXT://0.0.0.0:9092
-      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka-local:9092
-      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
-
-    depends_on:
-      - zookeeper
+    command:
+      - redpanda
+      - start
+      - --overprovisioned
+      - --smp
+      - "1"
+      - --memory
+      - "512M"
+      - --reserve-memory
+      - "0M"
+      - --node-id
+      - "0"
+      - --check=false
+      - --kafka-addr
+      - PLAINTEXT://0.0.0.0:9092
+      - --advertise-kafka-addr
+      - PLAINTEXT://kafka-local:9092
 
   # ========================
   # QUARKUS BACKEND
   # ========================
   mail-service:
-    image: dthieudocker/mail-quarkus-backend:2.0
+    image: dthieudocker/mail-quarkus-backend:3.0
     container_name: mail-service
     ports:
       - "8080:8080"
@@ -72,20 +78,20 @@ services:
       QUARKUS_DATASOURCE_PASSWORD: 12345
 
       # ========================
-      # KAFKA (override toàn bộ)
+      # KAFKA (GIỮ NGUYÊN)
       # ========================
       KAFKA_BOOTSTRAP_SERVERS: kafka-local:9092
 
       # ========================
       # MAIL
       # ========================
-      QUARKUS_MAILER_HOST: mailhog
+      QUARKUS_MAILER_HOST: mailpit
       QUARKUS_MAILER_PORT: 1025
 
     depends_on:
       - kafka-local
       - my-postgres
-      - mailhog
+      - mailpit
 
   # ========================
   # STREAMLIT UI
@@ -97,7 +103,6 @@ services:
       - "8501:8501"
 
     environment:
-      # 👇 override config UI
       KAFKA_SERVER: kafka-local:9092
       WS_URL: ws://mail-service:8080/mail-status
 

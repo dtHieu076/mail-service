@@ -1,4 +1,5 @@
 target/
+!target/*-runner
 .git/
 node_modules/
 Dockerfile*

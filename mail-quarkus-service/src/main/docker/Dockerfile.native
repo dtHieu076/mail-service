@@ -1,29 +1,23 @@
-####
-# This Dockerfile is used in order to build a container that runs the Quarkus application in native (no JVM) mode.
-#
-# Before building the container image run:
-#
-# ./mvnw package -Dnative
-#
-# Then, build the image with:
-#
-# docker build -f src/main/docker/Dockerfile.native -t quarkus/mail-quarkus-service .
-#
-# Then run the container using:
-#
-# docker run -i --rm -p 8080:8080 quarkus/mail-quarkus-service
-#
-# The ` registry.access.redhat.com/ubi9/ubi-minimal:9.7` base image is based on UBI 9.
-# To use UBI 8, switch to `quay.io/ubi8/ubi-minimal:8.10`.
-###
 FROM registry.access.redhat.com/ubi9/ubi-minimal:9.7
+
 WORKDIR /work/
+
+# Cấp quyền cho user 1001
 RUN chown 1001 /work \
     && chmod "g+rwX" /work \
     && chown 1001:root /work
-COPY --chown=1001:root --chmod=0755 target/*-runner /work/application
 
+# Copy file thực thi native từ target vào container
+COPY --chown=1001:root --chmod=0755 target/mail-quarkus-service-1.0.0-SNAPSHOT-runner* /work/application
+
+# Network
 EXPOSE 8080
+
+# Chuyển sang user non-root để bảo mật
 USER 1001
 
-ENTRYPOINT ["./application", "-Dquarkus.http.host=0.0.0.0"]
+# ========================
+# Start 
+# ========================
+# Biến múi giờ và host được truyền trực tiếp tại đây hoặc qua Docker Compose
+ENTRYPOINT ["./application", "-Dquarkus.http.host=0.0.0.0", "-Duser.timezone=Asia/Ho_Chi_Minh"]
