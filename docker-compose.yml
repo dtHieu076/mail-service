@@ -40,6 +40,8 @@ services:
   kafka-local:
     image: redpandadata/redpanda:latest
     container_name: kafka-local
+    volumes:
+      - kafka_data:/var/lib/redpanda/data
     ports:
       - "9092:9092"
     command:
@@ -115,3 +117,4 @@ services:
 # ========================
 volumes:
   postgres_data:
+  kafka_data:
